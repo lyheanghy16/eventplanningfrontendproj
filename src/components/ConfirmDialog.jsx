@@ -1,7 +1,14 @@
+/**
+ * ConfirmDialog: modal confirmation for actions that remove or change data.
+ * Used by EventDetail; confirmation and cancellation are delegated through callbacks.
+ */
 import PropTypes from 'prop-types';
 import Modal from './Modal';
 
-/** Confirmation modal for destructive actions. Cancel is focused first for safety. */
+/**
+ * Props: title/message describe the action, confirmLabel/danger style the primary action,
+ * and onConfirm/onCancel handle the user's choice. The cancel action receives initial focus.
+ */
 export default function ConfirmDialog({
   title, message, confirmLabel = 'Delete', danger = true, onConfirm, onCancel,
 }) {

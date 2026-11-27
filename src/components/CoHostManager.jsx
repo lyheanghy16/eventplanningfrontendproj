@@ -1,10 +1,18 @@
+/**
+ * CoHostManager: host-facing checklist for assigning co-host permissions.
+ * Used in EventDetail; it edits local selection and submits selected user IDs via onSave.
+ */
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { eventShape, userShape } from '../propTypes';
 import Avatar from './Avatar';
 
-/** Host-only control for choosing which users are co-hosts of an event. */
+/**
+ * Props: event supplies current host/co-host IDs, users are selectable accounts, and onSave persists the IDs.
+ * Local selected state tracks edits until the host saves them.
+ */
 export default function CoHostManager({ event, users, onSave }) {
+  // Keep edits local until Save is pressed; the event prop supplies the initial selection.
   const [selected, setSelected] = useState(event.coHostIds || []);
   const candidates = users.filter((u) => u.id !== event.hostId);
 

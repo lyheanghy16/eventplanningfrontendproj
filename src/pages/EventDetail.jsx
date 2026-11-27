@@ -1,3 +1,7 @@
+/**
+ * EventDetail: role-aware event workspace for overview, attendees, tasks, and comments.
+ * Routed at /events/:id; reads active-user permissions and event data from the contexts.
+ */
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import AttendeeList from '../components/AttendeeList';
@@ -29,10 +33,8 @@ import {
 } from '../utils/eventHelpers';
 
 /**
- * Event workspace at /events/:id. What you see depends on your role:
- *   Host      - everything, including delete and co-host management
- *   Co-host   - edit event, attendees, tasks, moderate comments
- *   Guest     - details, RSVP, comments (tasks and attendee list are hidden)
+ * Route id selects the event; currentUser determines role/permissions.
+ * Local dialog and task-view state controls edits, confirmations, and the task presentation.
  */
 export default function EventDetail() {
   const { id } = useParams();
@@ -48,6 +50,7 @@ export default function EventDetail() {
   const event = events.find((e) => e.id === id);
   useDocumentTitle(event?.title);
 
+  // Dialog selections, confirmation targets, and task layout stay local; EventContext owns shared records.
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [taskDialog, setTaskDialog] = useState(null); // { task? } when open
@@ -66,7 +69,7 @@ export default function EventDetail() {
   if (!event) {
     return (
       <div className="page">
-        <EmptyState icon="🧭" title="Event not found" action={<Link to="/" className="btn btn--primary">Back to dashboard</Link>}>
+        <EmptyState icon="🧭" title="Event not found" action={<Link to="/dashboard" className="btn btn--primary">Back to dashboard</Link>}>
           It may have been deleted, or the link is incorrect.
         </EmptyState>
       </div>
@@ -97,7 +100,7 @@ export default function EventDetail() {
   function handleDelete() {
     deleteEvent(event.id);
     toast.success(`"${event.title}" deleted`);
-    navigate('/');
+    navigate('/dashboard');
   }
 
   function handleDuplicate() {
@@ -126,7 +129,7 @@ export default function EventDetail() {
 
   return (
     <div className="page">
-      <Link to="/" className="back-link">← All events</Link>
+      <Link to="/dashboard" className="back-link">← All events</Link>
 
       <div className="hero" style={getCoverStyle(event)}>
         <div className="hero-overlay">

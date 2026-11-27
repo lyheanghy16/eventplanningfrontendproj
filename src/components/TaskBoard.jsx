@@ -1,3 +1,7 @@
+/**
+ * TaskBoard: event tasks in draggable status columns with keyboard move buttons.
+ * Used by EventDetail; TaskItem handles each task card and its available actions.
+ */
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { taskShape, userShape } from '../propTypes';
@@ -5,10 +9,11 @@ import { TASK_STATUSES, compareTasks } from '../utils/eventHelpers';
 import TaskItem from './TaskItem';
 
 /**
- * Kanban board with HTML5 drag-and-drop. Touch and keyboard users get ← / → buttons on each
- * card, so drag-and-drop is an enhancement rather than a requirement.
+ * Props: tasks/usersById supply board data; canEdit/canMove gate actions;
+ * onMove/onEdit/onDelete delegate changes to the parent. Local state tracks active drag/target column.
  */
 export default function TaskBoard({ tasks, usersById, canEdit = false, canMove, onMove, onEdit = () => {}, onDelete = () => {} }) {
+  // Track drag feedback only; task state itself remains owned by EventContext.
   const [draggingId, setDraggingId] = useState(null);
   const [overColumn, setOverColumn] = useState(null);
 

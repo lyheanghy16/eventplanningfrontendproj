@@ -1,3 +1,7 @@
+/**
+ * TaskForm: validated create/edit form for a task's title, assignee, due date, priority, and status.
+ * Used by EventDetail; submit and cancel callbacks keep persistence with the page.
+ */
 import { useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { taskShape, userShape } from '../propTypes';
@@ -13,8 +17,12 @@ export function validateTask(values) {
   return errors;
 }
 
-/** Add / edit a task: title, assignee, due date, priority and status. */
+/**
+ * Props: task prefills edit values, users populate assignees, submitLabel names the action,
+ * and onSubmit/onCancel return control to the parent. Draft/touched/submitted state drives validation.
+ */
 export default function TaskForm({ task, users, submitLabel, onSubmit, onCancel }) {
+  // Draft form values and validation visibility are scoped to this dialog.
   const [values, setValues] = useState({
     title: task?.title || '',
     assigneeId: task?.assigneeId || '',

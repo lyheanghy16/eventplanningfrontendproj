@@ -3,10 +3,12 @@ import { useEffect, useState } from 'react';
 /**
  * Ticking countdown to an event's start.
  * Returns { status: 'upcoming' | 'live' | 'ended', days, hours, minutes, seconds, totalMs }.
+ * Used by the Countdown component on event pages.
  */
 export default function useCountdown(start, end) {
   const [now, setNow] = useState(() => Date.now());
 
+  // Update the countdown once per second while mounted; clear the timer when inputs/page unmount.
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);

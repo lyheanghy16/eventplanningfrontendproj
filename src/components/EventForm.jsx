@@ -1,8 +1,13 @@
+/**
+ * EventForm: validated create/edit form for event details, schedule, venue, and visibility.
+ * Used by Dashboard, EventDetail, and NewEventPage; submit/cancel work through parent callbacks.
+ */
 import { useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { eventShape } from '../propTypes';
 import { fromInputDateTime, toInputDateTime } from '../utils/dateHelpers';
 import { isValidUrl } from '../utils/validators';
+import { useAuth } from '../context/AuthContext';
 import FormField from './FormField';
 
 const COLORS = ['#4f46e5', '#0284c7', '#059669', '#d97706', '#dc2626', '#db2777', '#7c3aed', '#0d9488'];
@@ -72,8 +77,13 @@ export function validateEvent(v) {
   return errors;
 }
 
-/** Create / edit form for an event, with inline validation. */
+/**
+ * Props: optional event prefills edits; submitLabel, onSubmit, and onCancel configure the form actions.
+ * Local values, touched, and submitted state drive validation and focus the first invalid field.
+ */
 export default function EventForm({ event, submitLabel, onSubmit, onCancel }) {
+  const { isDemoMode } = useAuth();
+  // Keep the editable draft, field-visit state, and submission state local to this form.
   const [values, setValues] = useState(() => (event ? valuesFromEvent(event) : defaultValues()));
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -121,6 +131,11 @@ export default function EventForm({ event, submitLabel, onSubmit, onCancel }) {
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} noValidate className="form-grid">
+      {isDemoMode && !event && (
+        <p className="demo-event-note span-2">
+          Demo mode: events you create are saved only in this browser.
+        </p>
+      )}
       <FormField label="Title" required error={shown('title')} className="span-2">
         {(p) => (
           <input {...p} type="text" maxLength={120} value={values.title} onChange={set('title')} onBlur={blur('title')} placeholder="e.g. Summer rooftop party" />

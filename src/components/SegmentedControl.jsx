@@ -1,6 +1,13 @@
+/**
+ * SegmentedControl: accessible single-choice buttons for filters and view selection.
+ * Used by Dashboard, CalendarPage, EventDetail, AttendeeList, TaskList, and MyTasks.
+ */
 import PropTypes from 'prop-types';
 
-/** Group of toggle buttons (filters, view switchers). Uses aria-pressed for state. */
+/**
+ * Props: label names the group, options defines its choices, value is selected, and onChange reports selection.
+ * Each option uses aria-pressed so state is conveyed without relying on color.
+ */
 export default function SegmentedControl({ label, options, value, onChange }) {
   return (
     <div className="segmented" role="group" aria-label={label}>

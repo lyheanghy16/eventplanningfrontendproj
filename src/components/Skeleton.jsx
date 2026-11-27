@@ -1,6 +1,10 @@
+/**
+ * Skeleton: lightweight loading placeholders for event cards and page content.
+ * Used by Dashboard, CalendarPage, EventDetail, and MyTasks while data loads.
+ */
 import PropTypes from 'prop-types';
 
-/** Loading placeholders. Hidden from assistive tech; the wrapper announces "Loading". */
+/** EventCardSkeleton renders one decorative loading card; its grid wrapper announces loading. */
 export function EventCardSkeleton() {
   return (
     <div className="event-card skeleton-card" aria-hidden="true">
@@ -15,6 +19,7 @@ export function EventCardSkeleton() {
   );
 }
 
+/** SkeletonGrid renders `count` event-card placeholders while event lists load. */
 export function SkeletonGrid({ count = 6 }) {
   return (
     <div className="card-grid" role="status" aria-label="Loading events">
@@ -27,6 +32,7 @@ export function SkeletonGrid({ count = 6 }) {
 
 SkeletonGrid.propTypes = { count: PropTypes.number };
 
+/** PageSkeleton renders a large placeholder for a page-level event detail load. */
 export function PageSkeleton() {
   return (
     <div className="page" role="status" aria-label="Loading">

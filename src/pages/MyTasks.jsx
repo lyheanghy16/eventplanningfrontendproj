@@ -1,7 +1,10 @@
-import { useMemo, useState } from 'react';
+/**
+ * MyTasks: shows tasks assigned to the active account across its visible events.
+ * Routed at /tasks; EventContext supplies tasks while AuthContext supplies currentUser.
+ */
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import EmptyState from '../components/EmptyState';
-import RequireUser from '../components/RequireUser';
 import SegmentedControl from '../components/SegmentedControl';
 import { SkeletonGrid } from '../components/Skeleton';
 import TaskList from '../components/TaskList';
@@ -11,21 +14,16 @@ import { useToast } from '../context/ToastContext';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { getRole, isTaskOverdue } from '../utils/eventHelpers';
 
-/** Cross-event task list for the signed-in user, with overdue highlighting. */
+/** Local scope filters task rows; account changes reset that scope to show all assigned tasks. */
 export default function MyTasks() {
   useDocumentTitle('My tasks');
-  return (
-    <RequireUser>
-      <MyTasksInner />
-    </RequireUser>
-  );
-}
-
-function MyTasksInner() {
   const toast = useToast();
   const { status, events, tasks, users, updateTask } = useEvents();
   const { currentUser } = useAuth();
+  // Scope selects all, open, or overdue tasks for the current account.
   const [scope, setScope] = useState('mine');
+  // When currentUser.id changes, reset the task filter for the newly active account.
+  useEffect(() => setScope('mine'), [currentUser?.id]);
 
   const usersById = useMemo(() => Object.fromEntries(users.map((u) => [u.id, u])), [users]);
   const eventsById = useMemo(() => Object.fromEntries(events.map((e) => [e.id, e])), [events]);
@@ -85,7 +83,7 @@ function MyTasksInner() {
       {status === 'loading' ? (
         <SkeletonGrid count={3} />
       ) : myTasks.length === 0 ? (
-        <EmptyState icon="🎯" title="Nothing assigned to you" action={<Link to="/" className="btn">Browse events</Link>}>
+        <EmptyState icon="🎯" title="Nothing assigned to you" action={<Link to="/dashboard" className="btn">Browse events</Link>}>
           Tasks assigned to you will show up here.
         </EmptyState>
       ) : (

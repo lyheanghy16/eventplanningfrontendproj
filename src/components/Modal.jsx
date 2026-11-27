@@ -1,3 +1,7 @@
+/**
+ * Modal: accessible portal dialog with focus trapping, Escape handling, and scroll locking.
+ * Used for event forms, detail previews, and confirmation prompts.
+ */
 import { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
@@ -6,8 +10,8 @@ const FOCUSABLE =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /**
- * Accessible modal dialog: portal, focus trap, Esc to close, focus restored on close,
- * background scroll locked, labelled by its title.
+ * Props: title labels the dialog, onClose dismisses it, children are its content, and size sets its width.
+ * The effect preserves prior focus and page scroll while the dialog is mounted.
  */
 export default function Modal({ title, onClose, children, size = 'md' }) {
   const titleId = useId();
@@ -15,6 +19,7 @@ export default function Modal({ title, onClose, children, size = 'md' }) {
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
+  // On mount ([]), trap focus and lock scrolling; cleanup restores both when the modal unmounts.
   useEffect(() => {
     const previouslyFocused = document.activeElement;
     const node = dialogRef.current;

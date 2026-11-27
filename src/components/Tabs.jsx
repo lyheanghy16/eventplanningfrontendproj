@@ -1,10 +1,13 @@
+/**
+ * Tabs: WAI-ARIA tablist with keyboard navigation and roving focus.
+ * Used by EventDetail; its parent renders the labelled tab panel.
+ */
 import { useRef } from 'react';
 import PropTypes from 'prop-types';
 
 /**
- * WAI-ARIA tablist with roving tabindex and arrow/Home/End key support.
- * The parent renders the matching panel with id `panel-<tab id>` and
- * aria-labelledby `tab-<tab id>`.
+ * Props: label names the tablist, tabs defines id/label/count, active selects a tab,
+ * and onChange updates the parent-controlled selection.
  */
 export default function Tabs({ label, tabs, active, onChange }) {
   const refs = useRef({});

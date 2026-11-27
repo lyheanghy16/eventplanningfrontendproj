@@ -1,5 +1,9 @@
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+/**
+ * Dashboard: searches and filters events visible to the active account and starts event creation.
+ * Routed at /dashboard; uses AuthContext, EventContext, and toast notifications.
+ */
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import EmptyState from '../components/EmptyState';
 import EventCard from '../components/EventCard';
 import EventForm from '../components/EventForm';
@@ -22,7 +26,10 @@ const FILTERS = [
   { value: 'all', label: 'All' },
 ];
 
-/** Home: search + filter your events and create new ones. */
+/**
+ * Page-level query/filter/modal state is reset when the active account changes.
+ * Event ownership, RSVP, and role data are derived from currentUser and EventContext.
+ */
 export default function Dashboard() {
   useDocumentTitle('Dashboard');
   const navigate = useNavigate();
@@ -30,9 +37,17 @@ export default function Dashboard() {
   const { status, error, events, rsvps, createEvent } = useEvents();
   const { currentUser } = useAuth();
 
+  // Query, selected event filter, and create-dialog visibility are local dashboard UI state.
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('upcoming');
   const [creating, setCreating] = useState(false);
+
+  // When currentUser.id changes, clear account-specific search and view state.
+  useEffect(() => {
+    setQuery('');
+    setFilter('upcoming');
+    setCreating(false);
+  }, [currentUser?.id]);
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -64,6 +79,10 @@ export default function Dashboard() {
       });
   }, [events, rsvps, currentUser, query, filter]);
 
+  const hasPersonalEvents = rows.some(({ role, rsvp }) =>
+    role !== ROLES.GUEST || !!rsvp,
+  );
+
   function handleCreate(values) {
     const created = createEvent(values, currentUser.id);
     setCreating(false);
@@ -81,9 +100,7 @@ export default function Dashboard() {
           </p>
         </div>
         {currentUser && (
-          <button type="button" className="btn btn--primary" onClick={() => setCreating(true)}>
-            + New event
-          </button>
+          <Link to="/events/new" className="btn btn--primary">+ New event</Link>
         )}
       </div>
 
@@ -129,7 +146,17 @@ export default function Dashboard() {
         </EmptyState>
       )}
 
-      {status === 'ready' && rows.length > 0 && (
+      {status === 'ready' && rows.length > 0 && !hasPersonalEvents && !query && (
+        <EmptyState
+          icon="🎈"
+          title="Create your first event"
+          action={<Link to="/events/new" className="btn btn--primary">Create an event</Link>}
+        >
+          You do not have any events yet. Start a plan and invite people to gather.
+        </EmptyState>
+      )}
+
+      {status === 'ready' && rows.length > 0 && (hasPersonalEvents || query) && (
         <>
           <p className="sr-only" role="status">{rows.length} events shown</p>
           <div className="card-grid">

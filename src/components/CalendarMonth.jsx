@@ -1,3 +1,7 @@
+/**
+ * CalendarMonth: accessible six-row month grid with selectable days and events.
+ * Used by CalendarPage; date calculations and event overlap checks live in dateHelpers.
+ */
 import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { eventShape } from '../propTypes';
@@ -9,8 +13,8 @@ import {
 const MAX_VISIBLE = 3;
 
 /**
- * Month grid built from scratch. Uses a real <table> so assistive tech gets row/column
- * semantics, and every event is a <button> reachable with Tab.
+ * Props: anchor selects the month, events are displayed, onSelectEvent opens an event,
+ * and onSelectDay opens that day's week view. Memoized maps keep each date's events in order.
  */
 export default function CalendarMonth({ anchor, events, onSelectEvent, onSelectDay }) {
   const weeks = useMemo(() => getMonthMatrix(anchor), [anchor]);

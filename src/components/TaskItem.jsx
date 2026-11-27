@@ -1,3 +1,7 @@
+/**
+ * TaskItem: one task row or card, with status, due date, assignee, and permitted actions.
+ * Used by TaskList and TaskBoard; all mutations are delegated to parent callbacks.
+ */
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { eventShape, taskShape, userShape } from '../propTypes';
@@ -8,8 +12,9 @@ import Badge from './Badge';
 const PRIORITY_TONE = { high: 'danger', medium: 'warn', low: 'neutral' };
 
 /**
- * One task. `variant="row"` is used in lists (inline status select); `variant="card"` is used
- * on the Kanban board (draggable, with keyboard-friendly move buttons).
+ * Props: task plus optional assignee/event drive display; variant selects row/card layout;
+ * permission flags and callbacks control editing, status changes, dragging, and movement.
+ * The component derives overdue/status styling from the task rather than storing local state.
  */
 export default function TaskItem({
   task, assignee, event, variant = 'row', canEdit = false, canChangeStatus = false,

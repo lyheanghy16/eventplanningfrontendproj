@@ -1,3 +1,7 @@
+/**
+ * main: mounts the React tree and composes router, theme, toast, event, and auth providers.
+ * BrowserRouter wraps AuthProvider because auth actions navigate after session changes.
+ */
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -11,16 +15,16 @@ import './styles.css';
 // Provider order matters: Auth reads users from Events, and everything may toast.
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ThemeProvider>
-      <ToastProvider>
-        <EventProvider>
-          <AuthProvider>
-            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <ThemeProvider>
+        <ToastProvider>
+          <EventProvider>
+            <AuthProvider>
               <App />
-            </BrowserRouter>
-          </AuthProvider>
-        </EventProvider>
-      </ToastProvider>
-    </ThemeProvider>
+            </AuthProvider>
+          </EventProvider>
+        </ToastProvider>
+      </ThemeProvider>
+    </BrowserRouter>
   </StrictMode>,
 );

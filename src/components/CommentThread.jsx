@@ -1,3 +1,7 @@
+/**
+ * CommentThread: event discussion with author/organizer-aware moderation.
+ * Used by EventDetail; callbacks add or remove comments, and auth context is passed as props.
+ */
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { commentShape, eventShape, userShape } from '../propTypes';
@@ -10,8 +14,12 @@ import FormField from './FormField';
 
 const MAX_LENGTH = 1000;
 
-/** Discussion thread. Signed-in users can post; authors and hosts/co-hosts can delete. */
+/**
+ * Props: event/comments/usersById/currentUser describe the thread; onAdd and onDelete handle changes.
+ * Local text and error state supports the comment form and its validation feedback.
+ */
 export default function CommentThread({ event, comments, usersById, currentUser = null, onAdd, onDelete }) {
+  // Draft text and its validation error belong to this composer, not the shared event state.
   const [text, setText] = useState('');
   const [error, setError] = useState('');
   const role = getRole(event, currentUser?.id);

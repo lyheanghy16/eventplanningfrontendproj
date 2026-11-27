@@ -1,3 +1,7 @@
+/**
+ * TaskList: filterable, sorted task rows with optional event and assignee details.
+ * Used by EventDetail and MyTasks; TaskItem delegates task actions to the supplied callbacks.
+ */
 import { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { taskShape, userShape } from '../propTypes';
@@ -13,10 +17,14 @@ const FILTERS = [
   { value: 'done', label: 'Done' },
 ];
 
-/** Sorted, filterable list of tasks (open first, soonest due first). */
+/**
+ * Props provide tasks/lookups, permissions, action callbacks, and an empty message.
+ * Local filter state selects task status; visible rows are memoized and sorted.
+ */
 export default function TaskList({
   tasks, usersById, eventsById, canEdit = false, canChangeStatus = () => false, onStatusChange = () => {}, onEdit = () => {}, onDelete = () => {}, emptyMessage = 'Nothing matches this filter.',
 }) {
+  // Keep the selected status filter local to this list instance.
   const [filter, setFilter] = useState('all');
   const visible = useMemo(
     () => tasks.filter((t) => filter === 'all' || t.status === filter).sort(compareTasks),
