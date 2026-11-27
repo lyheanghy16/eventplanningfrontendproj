@@ -11,13 +11,13 @@ export default function EventCard({ event, role, stats, rsvp }) {
   const past = isEventPast(event);
   const start = new Date(event.start);
 
-  // POLISHED: Display the appropriate badge for the user's RSVP status.
+  // Change: change word used
   let rsvpBadge = null;
   if (rsvp) {
     if (rsvp.status === 'going' && rsvp.waitlisted) {
       rsvpBadge = <Badge tone="warn">Waitlisted</Badge>;
     } else if (rsvp.status === 'going') {
-      rsvpBadge = <Badge tone="success">Going</Badge>; // CHANGED
+      rsvpBadge = <Badge tone="success">Going</Badge>; 
     } else if (rsvp.status === 'maybe') {
       rsvpBadge = <Badge tone="primary">Maybe</Badge>;
     }
