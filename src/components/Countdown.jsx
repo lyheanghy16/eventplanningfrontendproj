@@ -1,7 +1,14 @@
+/**
+ * Countdown: presents an event's upcoming, live, or ended state.
+ * Used on EventDetail and PublicEvent; useCountdown supplies the changing time values.
+ */
 import PropTypes from 'prop-types';
 import useCountdown from '../hooks/useCountdown';
 
-/** Live countdown to an event's start; switches to "happening now" / "ended". */
+/**
+ * Props: start/end are ISO date strings defining the event interval.
+ * The useCountdown hook owns the one-second clock update.
+ */
 export default function Countdown({ start, end }) {
   const countdown = useCountdown(start, end);
 

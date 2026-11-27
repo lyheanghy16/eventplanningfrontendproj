@@ -13,6 +13,7 @@
  */
 import { buildSeed } from '../data/seed';
 
+// gather:db:v1 stores one JSON snapshot containing users, events, RSVPs, tasks, and comments.
 export const DB_KEY = 'gather:db:v1';
 
 // Simulated network latency so loading states are visible (skipped in tests).
@@ -24,6 +25,7 @@ function readRaw() {
     const raw = window.localStorage.getItem(DB_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch {
+    // Invalid JSON or unavailable storage falls through to the seeded in-memory database.
     return null;
   }
 }

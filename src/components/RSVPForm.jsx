@@ -1,3 +1,7 @@
+/**
+ * RSVPForm: collects a guest response and handles seat capacity and waitlist messaging.
+ * Used by EventDetail and PublicEvent; EventContext persists RSVP submissions.
+ */
 import { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useEvents } from '../context/EventContext';
@@ -39,8 +43,8 @@ export function validateRsvp(values, { event, stats, existing }) {
 }
 
 /**
- * RSVP form: Going / Maybe / Can't go + name, email and plus-ones.
- * Enforces capacity (extra "Going" RSVPs are waitlisted) and lets people update or cancel.
+ * Props: event/user/defaultEmail set the form context; onSaved/onRemoved notify the parent.
+ * Local draft, touched, and feedback state drives validation and reflects reducer outcomes.
  */
 export default function RSVPForm({ event, user = null, defaultEmail = '', onSaved, onRemoved }) {
   const { rsvps, submitRsvp, removeRsvp } = useEvents();
@@ -49,6 +53,7 @@ export default function RSVPForm({ event, user = null, defaultEmail = '', onSave
   const eventRsvps = useMemo(() => rsvps.filter((r) => r.eventId === event.id), [rsvps, event.id]);
   const stats = useMemo(() => getEventStats(event, eventRsvps), [event, eventRsvps]);
 
+  // Seed the draft from this account's existing RSVP so later edits update the same guest entry.
   const [values, setValues] = useState(() => {
     const email = user?.email || defaultEmail || '';
     const prior = findRsvpByEmail(eventRsvps, email);

@@ -1,3 +1,7 @@
+/**
+ * Avatar: decorative initials badge with a supplied or name-derived color.
+ * Used beside names throughout attendee, task, comment, and account UI.
+ */
 import PropTypes from 'prop-types';
 
 const FALLBACK_COLORS = ['#4f46e5', '#0284c7', '#db2777', '#b45309', '#047857', '#7c3aed'];
@@ -14,7 +18,10 @@ function initials(name) {
   return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
 }
 
-/** Decorative initials avatar (the person's name is always rendered as text nearby). */
+/**
+ * Props: name supplies initials/fallback color, color overrides that color, and size sets pixel dimensions.
+ * The name should be rendered separately because this decorative span is hidden from assistive technology.
+ */
 export default function Avatar({ name, color, size = 32 }) {
   return (
     <span

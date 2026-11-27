@@ -1,3 +1,7 @@
+/**
+ * Agenda: groups visible events into a chronological date list.
+ * Used by CalendarPage; each event button calls the supplied selection callback.
+ */
 import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { eventShape } from '../propTypes';
@@ -7,7 +11,11 @@ import {
 import { getLocationLabel } from '../utils/eventHelpers';
 import EmptyState from './EmptyState';
 
-/** Chronological list of events grouped by day for the next `days` days. */
+/**
+ * Renders events for `start` across `days` dates.
+ * Props: start (Date), days (range length), events (event records), onSelectEvent (selection callback).
+ * Memoizes grouped dates so calendar navigation only recalculates the displayed range.
+ */
 export default function Agenda({ start, days = 30, events, onSelectEvent }) {
   const groups = useMemo(() => {
     const first = startOfDay(start);

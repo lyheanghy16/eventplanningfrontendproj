@@ -1,3 +1,7 @@
+/**
+ * CalendarPage: displays permitted events in month, week, or agenda views with .ics export.
+ * Routed at /calendar; currentUser controls private-event visibility.
+ */
 import { useMemo, useState } from 'react';
 import Agenda from '../components/Agenda';
 import CalendarMonth from '../components/CalendarMonth';
@@ -22,14 +26,19 @@ const VIEWS = [
   { value: 'agenda', label: 'Agenda' },
 ];
 
-/** Calendar with month / week / agenda views built from scratch, plus .ics export. */
+/**
+ * Reads events/auth/toast contexts; local view, date anchor, and selected event drive the calendar UI.
+ * The chosen view persists under `gather:calendarView` so it survives a reload.
+ */
 export default function CalendarPage() {
   useDocumentTitle('Calendar');
   const toast = useToast();
   const { status, events, rsvps } = useEvents();
   const { currentUser } = useAuth();
 
+  // `gather:calendarView` stores the selected month/week/agenda view as a JSON string.
   const [view, setView] = useLocalStorage('gather:calendarView', 'month');
+  // Anchor is the date navigated by calendar controls; selected opens the quick-look dialog.
   const [anchor, setAnchor] = useState(() => startOfDay(new Date()));
   const [selected, setSelected] = useState(null);
 

@@ -147,7 +147,6 @@ export function getWaitlistPosition(stats, rsvpId) {
  * share link can still open the guest page (/event/:id) - the link acts as the invitation.
  */
 export function canSeeEvent(event, user, rsvps) {
-  if (event.visibility !== 'private') return true;
   if (!user) return false;
   if (getRole(event, user.id) !== ROLES.GUEST) return true;
   return !!getUserRsvp(event, user, rsvps);
@@ -179,6 +178,7 @@ export function getCoverStyle(event) {
 
 /* --------------------------------- tasks ---------------------------------- */
 
+/** Compares local calendar dates so a task due today is not overdue until tomorrow. */
 export function isTaskOverdue(task, now = new Date()) {
   return task.status !== 'done' && !!task.dueDate && parseDateKey(task.dueDate) < startOfDay(now);
 }

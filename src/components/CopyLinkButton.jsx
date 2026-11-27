@@ -1,8 +1,15 @@
+/**
+ * CopyLinkButton: copies an event's public URL and announces success or failure.
+ * Used by event cards, event detail, calendar details, and the public event page.
+ */
 import PropTypes from 'prop-types';
 import { useToast } from '../context/ToastContext';
 import { buildEventUrl } from '../utils/eventHelpers';
 
-/** Copies the public share URL (/event/:id) to the clipboard. */
+/**
+ * Props: eventId selects the share URL; label and className customize the button.
+ * Uses toast context to report clipboard results and a fallback for older/insecure browsers.
+ */
 export default function CopyLinkButton({ eventId, label = 'Copy link', className = 'btn btn--ghost btn--sm' }) {
   const toast = useToast();
 

@@ -4,6 +4,7 @@
  * - State changes go through a pure reducer (`eventReducer`, exported for tests).
  * - Ids/timestamps are created in the action creators, never in the reducer.
  * - Persistence is delegated to src/services/api.js (localStorage today, REST tomorrow).
+ * - Used by Dashboard, CalendarPage, EventDetail, PublicEvent, MyTasks, and related forms.
  * - Changes made in other tabs are pushed in via subscribeToDatabase, so a host's
  *   attendee list updates live while guests RSVP in another tab.
  */
@@ -36,6 +37,15 @@ export function eventReducer(state, action) {
 
     case 'LOAD_ERROR':
       return { ...state, status: 'error', error: action.error };
+
+    case 'USERS_SYNC':
+      return {
+        ...state,
+        users: action.payload.users.map((user) => {
+          const existing = state.users.find((item) => item.id === user.id);
+          return existing ? { ...existing, ...user } : user;
+        }),
+      };
 
     /* ------------------------------- events ------------------------------- */
     case 'EVENT_ADD':
@@ -139,13 +149,17 @@ const snapshot = (s) => ({
   comments: s.comments,
 });
 
+/**
+ * Provides the reducer-managed event database and its mutation actions.
+ * Props: children is the app subtree; effects hydrate, subscribe, and persist the database.
+ */
 export function EventProvider({ children }) {
   const [state, dispatch] = useReducer(eventReducer, initialState);
   const stateRef = useRef(state);
   stateRef.current = state;
   const skipNextSave = useRef(true); // don't write back data we just loaded / received
 
-  /* Initial load + live updates from other tabs. */
+  // On mount ([]), load the database and subscribe to cross-tab storage updates; cleanup cancels and unsubscribes.
   useEffect(() => {
     let cancelled = false;
     loadDatabase()
@@ -165,7 +179,7 @@ export function EventProvider({ children }) {
     };
   }, []);
 
-  /* Persist on every change after the first load. */
+  // On state changes, persist the ready snapshot after the initial hydration has been skipped.
   useEffect(() => {
     if (state.status !== 'ready') return;
     if (skipNextSave.current) {
@@ -180,16 +194,24 @@ export function EventProvider({ children }) {
     const now = () => new Date().toISOString();
 
     return {
+      /** Merge new profile fields into EventContext so names and avatars stay current. */
+      syncUsers(users) {
+        dispatch({ type: 'USERS_SYNC', payload: { users } });
+      },
+
+      /** Creates an event owned by hostId and returns the created record. */
       createEvent(values, hostId) {
         const event = { ...values, id: generateId('evt'), hostId, coHostIds: [], createdAt: now() };
         dispatch({ type: 'EVENT_ADD', payload: { event } });
         return event;
       },
 
+      /** Applies event field changes and lets the reducer rebalance seats if capacity changed. */
       updateEvent(id, changes) {
         dispatch({ type: 'EVENT_UPDATE', payload: { id, changes } });
       },
 
+      /** Deletes an event and its related RSVPs, tasks, and comments. */
       deleteEvent(id) {
         dispatch({ type: 'EVENT_DELETE', payload: { id } });
       },
@@ -247,27 +269,33 @@ export function EventProvider({ children }) {
         return preview.rsvps.find((r) => r.eventId === eventId && r.email === rsvp.email);
       },
 
+      /** Removes an RSVP; the reducer promotes waitlisted guests if seats open. */
       removeRsvp(id) {
         dispatch({ type: 'RSVP_REMOVE', payload: { id } });
       },
 
+      /** Creates a task for an event and returns the new record. */
       addTask(eventId, values) {
         const task = { ...values, id: generateId('task'), eventId, createdAt: now() };
         dispatch({ type: 'TASK_ADD', payload: { task } });
         return task;
       },
+      /** Applies changes to a task by ID. */
       updateTask(id, changes) {
         dispatch({ type: 'TASK_UPDATE', payload: { id, changes } });
       },
+      /** Deletes a task by ID. */
       deleteTask(id) {
         dispatch({ type: 'TASK_DELETE', payload: { id } });
       },
 
+      /** Adds a timestamped comment to an event. */
       addComment(eventId, userId, text) {
         const comment = { id: generateId('cmt'), eventId, userId, text: text.trim(), createdAt: now() };
         dispatch({ type: 'COMMENT_ADD', payload: { comment } });
         return comment;
       },
+      /** Deletes a comment by ID. */
       deleteComment(id) {
         dispatch({ type: 'COMMENT_DELETE', payload: { id } });
       },
@@ -287,6 +315,7 @@ export function EventProvider({ children }) {
 
 EventProvider.propTypes = { children: PropTypes.node.isRequired };
 
+/** Returns event state and actions; throws when called outside EventProvider. */
 export function useEvents() {
   const ctx = useContext(EventContext);
   if (!ctx) throw new Error('useEvents must be used inside <EventProvider>');

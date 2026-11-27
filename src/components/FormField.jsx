@@ -1,3 +1,7 @@
+/**
+ * FormField: connects a visible label, child input, hint, and validation message accessibly.
+ * Used by event, task, RSVP, and comment forms.
+ */
 import { useId } from 'react';
 import PropTypes from 'prop-types';
 

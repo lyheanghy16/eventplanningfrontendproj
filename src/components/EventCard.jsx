@@ -1,3 +1,7 @@
+/**
+ * EventCard: dashboard summary with date, role, RSVP, capacity, and share-link details.
+ * Used by Dashboard for each visible event.
+ */
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { eventShape, rsvpShape, statsShape } from '../propTypes';
@@ -6,7 +10,10 @@ import { ROLE_LABELS, ROLES, getCoverStyle, getLocationLabel, isEventPast } from
 import Badge from './Badge';
 import CopyLinkButton from './CopyLinkButton';
 
-/** Summary card used on the dashboard. The whole card is clickable via the title link. */
+/**
+ * Props: event, role, stats, and rsvp provide the personalized event summary.
+ * Uses event helpers for display labels and derives whether the event has ended.
+ */
 export default function EventCard({ event, role, stats, rsvp }) {
   const past = isEventPast(event);
   const start = new Date(event.start);

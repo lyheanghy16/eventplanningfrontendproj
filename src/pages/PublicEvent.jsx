@@ -1,3 +1,7 @@
+/**
+ * PublicEvent: shareable guest view with event details and RSVP, excluding private management data.
+ * Routed at /event/:id; contexts supply the event, attendees, host name, and active account.
+ */
 import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Badge from '../components/Badge';
@@ -13,11 +17,7 @@ import { formatEventRange } from '../utils/dateHelpers';
 import { downloadICS, slugify } from '../utils/icsExport';
 import { ROLES, getCoverStyle, getEventStats, getLocationLabel, getRole, isEventPast } from '../utils/eventHelpers';
 
-/**
- * Public guest view at /event/:id - the page behind every share link.
- * Shows only guest-safe information: no attendee emails, tasks or comments.
- * Anyone (signed in or not) can RSVP by entering a name and email.
- */
+/** The route id selects the event; currentUser controls host notices and RSVP prefill. */
 export default function PublicEvent() {
   const { id } = useParams();
   const { status, events, rsvps, users } = useEvents();

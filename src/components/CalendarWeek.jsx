@@ -1,3 +1,7 @@
+/**
+ * CalendarWeek: seven-day time grid that positions overlapping events in separate lanes.
+ * Used by CalendarPage; uses dateHelpers for day boundaries and the current-time marker.
+ */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { eventShape } from '../propTypes';
@@ -11,8 +15,8 @@ const MIN_MINUTES = 30; // minimum rendered height of an event block
 const HOURS = Array.from({ length: 24 }, (_, h) => h);
 
 /**
- * Greedy column layout so overlapping events sit side by side instead of stacking.
- * items: [{ event, startMin, endMin }] -> same items plus { lane, lanes }.
+ * Greedy interval layout keeps overlapping blocks side by side.
+ * Input items have event/startMin/endMin; returned items also have lane/lanes.
  */
 function layoutEvents(items) {
   const sorted = [...items].sort((a, b) => a.startMin - b.startMin || b.endMin - a.endMin);
@@ -50,9 +54,13 @@ function layoutEvents(items) {
   return result;
 }
 
-/** 7-day time grid. Events are positioned by time; multi-day events are clipped per day. */
+/**
+ * Props: anchor picks the week, events populate its columns, and onSelectEvent handles selection.
+ * Local `now` state refreshes the clock marker; a ref preserves the morning scroll position.
+ */
 export default function CalendarWeek({ anchor, events, onSelectEvent }) {
   const scrollRef = useRef(null);
+  // The minute-updated timestamp positions the live "now" line on today's column.
   const [now, setNow] = useState(() => new Date());
 
   const weekStartKey = toDateKey(startOfWeek(anchor));
@@ -82,9 +90,11 @@ export default function CalendarWeek({ anchor, events, onSelectEvent }) {
   );
 
   // Start scrolled to the morning, and keep the "now" line fresh.
+  // When weekStartKey changes, start at a useful morning hour.
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = 7 * HOUR_HEIGHT;
   }, [weekStartKey]);
+  // On mount ([]), refresh the current-time line each minute and clear the interval on unmount.
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(id);

@@ -1,6 +1,7 @@
 /**
  * Toast notifications. `useToast()` returns { success, error, info, dismiss }.
  * Toasts render in an aria-live region so screen readers announce them.
+ * Used by pages and form actions to provide brief operation feedback.
  */
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
@@ -9,7 +10,9 @@ import { generateId } from '../utils/idGenerator';
 const ToastContext = createContext(null);
 const ICONS = { success: '✓', error: '!', info: 'i' };
 
+/** Provides timed toast actions and renders their accessible live region around children. */
 export function ToastProvider({ children }) {
+  // Keep active announcements and their expiry timers together so dismissing a toast cleans up its timer.
   const [toasts, setToasts] = useState([]);
   const timers = useRef(new Map());
 
@@ -29,6 +32,7 @@ export function ToastProvider({ children }) {
     [dismiss],
   );
 
+  // On provider mount ([]), register cleanup that clears all remaining toast expiry timers.
   useEffect(() => {
     const active = timers.current;
     return () => active.forEach((timer) => clearTimeout(timer));
@@ -73,6 +77,7 @@ export function ToastProvider({ children }) {
 
 ToastProvider.propTypes = { children: PropTypes.node.isRequired };
 
+/** Returns success, error, info, and dismiss actions from ToastProvider. */
 export function useToast() {
   const ctx = useContext(ToastContext);
   if (!ctx) throw new Error('useToast must be used inside <ToastProvider>');

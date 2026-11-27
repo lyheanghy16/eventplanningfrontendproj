@@ -1,3 +1,7 @@
+/**
+ * AttendeeList: RSVP counts, capacity status, and a filterable attendee table.
+ * Used by EventDetail; hosts/co-hosts can optionally remove rows through onRemove.
+ */
 import { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { eventShape, rsvpShape, statsShape } from '../propTypes';
@@ -17,10 +21,11 @@ const FILTERS = [
 ];
 
 /**
- * Host/co-host view of everyone who responded: live counts, capacity meter and a filterable
- * table. Updates instantly when RSVPs change here or in another tab.
+ * Props: event/stats supply event data, canRemove controls removal, and onRemove receives a selected RSVP.
+ * Local filter state selects response status; RSVP data is supplied by the parent.
  */
 export default function AttendeeList({ event, stats, canRemove = false, onRemove = () => {} }) {
+  // The selected response category controls which attendee rows are shown.
   const [filter, setFilter] = useState('all');
 
   const rows = useMemo(() => {

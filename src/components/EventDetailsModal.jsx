@@ -1,3 +1,7 @@
+/**
+ * EventDetailsModal: quick-look event details, share link, and calendar export.
+ * Opened by CalendarPage when a user selects an event.
+ */
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { eventShape, statsShape } from '../propTypes';
@@ -8,7 +12,10 @@ import Badge from './Badge';
 import CopyLinkButton from './CopyLinkButton';
 import Modal from './Modal';
 
-/** Quick-look dialog opened from the calendar views. */
+/**
+ * Props: event/stats provide the event summary and onClose dismisses the modal.
+ * Calendar export and share-link actions are handled by their respective helpers/components.
+ */
 export default function EventDetailsModal({ event, stats, onClose }) {
   return (
     <Modal title={event.title} onClose={onClose}>
