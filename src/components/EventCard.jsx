@@ -18,15 +18,23 @@ export default function EventCard({ event, role, stats, rsvp }) {
   const past = isEventPast(event);
   const start = new Date(event.start);
 
+  // Change: change word used
   let rsvpBadge = null;
   if (rsvp) {
-    if (rsvp.status === 'going' && rsvp.waitlisted) rsvpBadge = <Badge tone="warn">Waitlisted</Badge>;
-    else if (rsvp.status === 'going') rsvpBadge = <Badge tone="success">You&apos;re going</Badge>;
-    else if (rsvp.status === 'maybe') rsvpBadge = <Badge tone="primary">Maybe</Badge>;
+    if (rsvp.status === 'going' && rsvp.waitlisted) {
+      rsvpBadge = <Badge tone="warn">Waitlisted</Badge>;
+    } else if (rsvp.status === 'going') {
+      rsvpBadge = <Badge tone="success">Going</Badge>; 
+    } else if (rsvp.status === 'maybe') {
+      rsvpBadge = <Badge tone="primary">Maybe</Badge>;
+    }
   }
 
   return (
-    <article className={`event-card ${past ? 'is-past' : ''}`} style={{ '--ev-color': event.color }}>
+    <article
+      className={`event-card ${past ? 'is-past' : ''}`}
+      style={{ '--ev-color': event.color }}
+    >
       <div className="event-cover" style={getCoverStyle(event)} aria-hidden="true">
         <span className="date-chip">
           <span>{formatMonthShort(start)}</span>
@@ -36,7 +44,9 @@ export default function EventCard({ event, role, stats, rsvp }) {
 
       <div className="event-card-body">
         <div className="badge-row">
-          {role !== ROLES.GUEST && <Badge tone="primary">{ROLE_LABELS[role]}</Badge>}
+          {role !== ROLES.GUEST && (
+            <Badge tone="primary">{ROLE_LABELS[role]}</Badge>
+          )}
           {event.visibility === 'private' && <Badge>🔒 Private</Badge>}
           {past && <Badge>Past</Badge>}
           {stats.isFull && !past && <Badge tone="warn">Full</Badge>}
@@ -44,11 +54,19 @@ export default function EventCard({ event, role, stats, rsvp }) {
         </div>
 
         <h3 className="event-card-title">
-          <Link to={`/events/${event.id}`} className="stretched-link">{event.title}</Link>
+          <Link to={`/events/${event.id}`} className="stretched-link">
+            {event.title}
+          </Link>
         </h3>
 
-        <p className="event-meta"><span aria-hidden="true">🗓</span> {formatEventRange(event.start, event.end)}</p>
-        <p className="event-meta"><span aria-hidden="true">📍</span> {getLocationLabel(event)}</p>
+        <p className="event-meta">
+          <span aria-hidden="true">🗓</span> {formatEventRange(event.start, event.end)}
+        </p>
+
+        <p className="event-meta">
+          <span aria-hidden="true">📍</span> {getLocationLabel(event)}
+        </p>
+
         <p className="event-meta">
           <span aria-hidden="true">👥</span> {stats.seatsTaken} going
           {stats.capacity > 0 && ` of ${stats.capacity}`}

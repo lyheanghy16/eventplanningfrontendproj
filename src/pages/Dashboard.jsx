@@ -1,21 +1,23 @@
 /**
- * Dashboard: searches and filters events visible to the active account and starts event creation.
- * Routed at /dashboard; uses AuthContext, EventContext, and toast notifications.
+ * Dashboard: searches and filters events visible to the active account.
+ * Routed at /dashboard; uses AuthContext and EventContext.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import EmptyState from '../components/EmptyState';
 import EventCard from '../components/EventCard';
-import EventForm from '../components/EventForm';
-import Modal from '../components/Modal';
 import SegmentedControl from '../components/SegmentedControl';
 import { SkeletonGrid } from '../components/Skeleton';
 import { useAuth } from '../context/AuthContext';
 import { useEvents } from '../context/EventContext';
-import { useToast } from '../context/ToastContext';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import {
-  ROLES, canSeeEvent, getEventStats, getRole, getUserRsvp, isEventPast,
+  ROLES,
+  canSeeEvent,
+  getEventStats,
+  getRole,
+  getUserRsvp,
+  isEventPast,
 } from '../utils/eventHelpers';
 
 const FILTERS = [
@@ -27,68 +29,77 @@ const FILTERS = [
 ];
 
 /**
- * Page-level query/filter/modal state is reset when the active account changes.
+ * Page-level query and filter state reset when the active account changes.
  * Event ownership, RSVP, and role data are derived from currentUser and EventContext.
  */
 export default function Dashboard() {
   useDocumentTitle('Dashboard');
-  const navigate = useNavigate();
-  const toast = useToast();
-  const { status, error, events, rsvps, createEvent } = useEvents();
+
+  const { status, error, events, rsvps } = useEvents();
   const { currentUser } = useAuth();
 
-  // Query, selected event filter, and create-dialog visibility are local dashboard UI state.
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('upcoming');
-  const [creating, setCreating] = useState(false);
 
-  // When currentUser.id changes, clear account-specific search and view state.
+  // Reset account-specific dashboard state when the user changes.
   useEffect(() => {
     setQuery('');
     setFilter('upcoming');
-    setCreating(false);
   }, [currentUser?.id]);
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
+
     return events
       .filter((event) => canSeeEvent(event, currentUser, rsvps))
       .map((event) => {
         const role = getRole(event, currentUser?.id);
         const rsvp = getUserRsvp(event, currentUser, rsvps);
-        return { event, role, rsvp, stats: getEventStats(event, rsvps) };
+
+        return {
+          event,
+          role,
+          rsvp,
+          stats: getEventStats(event, rsvps),
+        };
       })
       .filter(({ event, role, rsvp }) => {
-        if (q) {
-          const haystack = `${event.title} ${event.description} ${event.location}`.toLowerCase();
-          if (!haystack.includes(q)) return false;
-        }
+        // POLISHED: Safely combine searchable event information.
+        const haystack = [
+          event.title,
+          event.description,
+          event.location,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        if (q && !haystack.includes(q)) return false;
+
         const past = isEventPast(event);
+
         switch (filter) {
-          case 'upcoming': return !past;
-          case 'past': return past;
-          case 'hosting': return role !== ROLES.GUEST;
-          // "Attending" = you RSVP'd going/maybe and you're not running it yourself.
-          case 'attending': return !!rsvp && rsvp.status !== 'declined' && role === ROLES.GUEST;
-          default: return true;
+          case 'upcoming':
+            return !past;
+          case 'past':
+            return past;
+          case 'hosting':
+            return role !== ROLES.GUEST;
+          case 'attending':
+            return !!rsvp && rsvp.status !== 'declined' && role === ROLES.GUEST;
+          default:
+            return true;
         }
       })
       .sort((a, b) => {
         const diff = new Date(a.event.start) - new Date(b.event.start);
-        return filter === 'past' ? -diff : diff; // newest first for past events
+        return filter === 'past' ? -diff : diff;
       });
   }, [events, rsvps, currentUser, query, filter]);
 
-  const hasPersonalEvents = rows.some(({ role, rsvp }) =>
-    role !== ROLES.GUEST || !!rsvp,
+  const hasPersonalEvents = rows.some(
+    ({ role, rsvp }) => role !== ROLES.GUEST || !!rsvp,
   );
-
-  function handleCreate(values) {
-    const created = createEvent(values, currentUser.id);
-    setCreating(false);
-    toast.success(`"${created.title}" created`);
-    navigate(`/events/${created.id}`);
-  }
 
   return (
     <div className="page">
@@ -96,32 +107,47 @@ export default function Dashboard() {
         <div>
           <h1>Events</h1>
           <p className="muted">
-            {currentUser ? `Welcome back, ${currentUser.name.split(' ')[0]}.` : 'Browsing as a public guest.'}
+            {currentUser
+              ? `Welcome back, ${currentUser.name?.split(' ')[0] || 'there'}.`
+              : 'Browsing as a public guest.'}
           </p>
         </div>
+
         {currentUser && (
-          <Link to="/events/new" className="btn btn--primary">+ New event</Link>
+          <Link to="/events/new" className="btn btn--primary">
+            + New event
+          </Link>
         )}
       </div>
 
       <div className="toolbar">
         <div className="search">
-          <label htmlFor="event-search" className="sr-only">Search events</label>
+          <label htmlFor="event-search" className="sr-only">
+            Search events
+          </label>
           <input
             id="event-search"
             type="search"
-            placeholder="Search by title, description or place…"
+            placeholder="Search events by title, description, or location…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
-        <SegmentedControl label="Filter events" options={FILTERS} value={filter} onChange={setFilter} />
+
+        <SegmentedControl
+          label="Filter events"
+          options={FILTERS}
+          value={filter}
+          onChange={setFilter}
+        />
       </div>
 
       {status === 'loading' && <SkeletonGrid />}
 
       {status === 'error' && (
-        <EmptyState icon="⚠️" title="Couldn't load events">{error}</EmptyState>
+        <EmptyState icon="⚠️" title="Couldn't load events">
+          {error}
+        </EmptyState>
       )}
 
       {status === 'ready' && rows.length === 0 && (
@@ -130,9 +156,17 @@ export default function Dashboard() {
           title={query ? 'No events match your search' : 'No events here yet'}
           action={
             !query && currentUser ? (
-              <button type="button" className="btn btn--primary" onClick={() => setCreating(true)}>Create an event</button>
+              <Link to="/events/new" className="btn btn--primary">
+                Create an event
+              </Link>
             ) : query ? (
-              <button type="button" className="btn" onClick={() => setQuery('')}>Clear search</button>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setQuery('')}
+              >
+                Clear search
+              </button>
             ) : null
           }
         >
@@ -150,7 +184,11 @@ export default function Dashboard() {
         <EmptyState
           icon="🎈"
           title="Create your first event"
-          action={<Link to="/events/new" className="btn btn--primary">Create an event</Link>}
+          action={
+            <Link to="/events/new" className="btn btn--primary">
+              Create an event
+            </Link>
+          }
         >
           You do not have any events yet. Start a plan and invite people to gather.
         </EmptyState>
@@ -158,19 +196,22 @@ export default function Dashboard() {
 
       {status === 'ready' && rows.length > 0 && (hasPersonalEvents || query) && (
         <>
-          <p className="sr-only" role="status">{rows.length} events shown</p>
+          <p className="sr-only" role="status">
+            {rows.length} events shown
+          </p>
+
           <div className="card-grid">
             {rows.map(({ event, role, rsvp, stats }) => (
-              <EventCard key={event.id} event={event} role={role} stats={stats} rsvp={rsvp} />
+              <EventCard
+                key={event.id}
+                event={event}
+                role={role}
+                stats={stats}
+                rsvp={rsvp}
+              />
             ))}
           </div>
         </>
-      )}
-
-      {creating && (
-        <Modal title="Create event" onClose={() => setCreating(false)} size="lg">
-          <EventForm submitLabel="Create event" onSubmit={handleCreate} onCancel={() => setCreating(false)} />
-        </Modal>
       )}
     </div>
   );

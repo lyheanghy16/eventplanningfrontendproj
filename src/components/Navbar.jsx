@@ -20,12 +20,21 @@ export default function Navbar() {
   const location = useLocation();
   const publicPage = ['/', '/welcome', '/login', '/signup'].includes(location.pathname);
 
+  // POLISHED: Calculate the number of overdue tasks assigned to the current user.
   const overdueCount = useMemo(
-    () => (currentUser ? tasks.filter((t) => t.assigneeId === currentUser.id && isTaskOverdue(t)).length : 0),
+    () =>
+      currentUser
+        ? tasks.filter(
+            (task) =>
+              task.assigneeId === currentUser.id && isTaskOverdue(task),
+          ).length
+        : 0,
     [tasks, currentUser],
   );
 
-  const linkClass = ({ isActive }) => `nav-link ${isActive ? 'is-active' : ''}`;
+  const linkClass = ({ isActive }) =>
+    `nav-link ${isActive ? 'is-active' : ''}`;
+
   return (
     <header className="site-header">
       <div className="site-header-inner">
@@ -33,14 +42,24 @@ export default function Navbar() {
           <span aria-hidden="true">🎉</span> Gather
         </Link>
 
+        {/* CHANGED: Show main navigation only on authenticated, non-public pages. */}
         {!publicPage && isAuthenticated && (
           <nav aria-label="Main" className="main-nav">
-            <NavLink to="/dashboard" end className={linkClass}>Dashboard</NavLink>
-            <NavLink to="/calendar" className={linkClass}>Calendar</NavLink>
+            <NavLink to="/dashboard" end className={linkClass}>
+              Dashboard
+            </NavLink>
+
+            <NavLink to="/calendar" className={linkClass}>
+              Calendar
+            </NavLink>
+
             <NavLink to="/tasks" className={linkClass}>
               My Tasks
               {overdueCount > 0 && (
-                <span className="nav-badge" title={`${overdueCount} overdue`}>
+                <span
+                  className="nav-badge"
+                  title={`${overdueCount} overdue`}
+                >
                   {overdueCount}
                   <span className="sr-only"> overdue tasks</span>
                 </span>
@@ -51,16 +70,27 @@ export default function Navbar() {
 
         <div className="header-tools">
           <ThemeToggle />
+
           {publicPage && !isAuthenticated && (
             <>
-              <Link className="btn btn--ghost btn--sm" to="/login">Log in</Link>
-              <Link className="btn btn--primary btn--sm" to="/signup">Sign up</Link>
+              <Link className="btn btn--ghost btn--sm" to="/login">
+                Log in
+              </Link>
+              <Link className="btn btn--primary btn--sm" to="/signup">
+                Sign up
+              </Link>
             </>
           )}
+
           {publicPage && isAuthenticated && (
-            <Link className="btn btn--primary btn--sm" to="/dashboard">Go to dashboard</Link>
+            <Link className="btn btn--primary btn--sm" to="/dashboard">
+              Go to dashboard
+            </Link>
           )}
-          {isAuthenticated && !publicPage && <AccountSwitcher showDemoBadge={isDemoMode} />}
+
+          {isAuthenticated && !publicPage && (
+            <AccountSwitcher showDemoBadge={isDemoMode} />
+          )}
         </div>
       </div>
     </header>
