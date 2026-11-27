@@ -152,7 +152,7 @@ export default function Dashboard() {
 
       {status === 'ready' && rows.length === 0 && (
         <EmptyState
-          icon={query ? '🔍' : '🎈'}
+          icon={query ? '🔍' : null}
           title={query ? 'No events match your search' : 'No events here yet'}
           action={
             !query && currentUser ? (
@@ -182,7 +182,6 @@ export default function Dashboard() {
 
       {status === 'ready' && rows.length > 0 && !hasPersonalEvents && !query && (
         <EmptyState
-          icon="🎈"
           title="Create your first event"
           action={
             <Link to="/events/new" className="btn btn--primary">

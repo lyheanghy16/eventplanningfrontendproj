@@ -97,7 +97,7 @@ export default function MyTasks() {
             updateTask(task.id, { status: next });
             if (next === 'done') toast.success('Nice - task completed');
           }}
-          emptyMessage={scope === 'overdue' ? 'You are all caught up. 🎉' : 'Nothing matches this filter.'}
+          emptyMessage={scope === 'overdue' ? 'You are all caught up.' : 'Nothing matches this filter.'}
         />
       )}
     </div>

@@ -39,7 +39,7 @@ export default function Navbar() {
     <header className="site-header">
       <div className="site-header-inner">
         <Link to="/" className="brand" aria-label="Gather home">
-          <span aria-hidden="true">🎉</span> Gather
+          Gather
         </Link>
 
         {/* CHANGED: Show main navigation only on authenticated, non-public pages. */}

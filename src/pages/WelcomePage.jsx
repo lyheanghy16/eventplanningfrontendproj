@@ -23,7 +23,6 @@ export default function WelcomePage() {
   return (
     <div className="welcome-page">
       <section className="welcome-hero">
-        <span className="welcome-logo" aria-hidden="true">🎉</span>
         <h1>Plan events. Share tasks. Gather people.</h1>
         <p>One place to organize guests, schedules and every detail that makes an event memorable.</p>
         <div className="welcome-actions">
